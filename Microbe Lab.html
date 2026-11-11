@@ -1,0 +1,3103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microbe Lab</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #2ecc71;
+            background-image: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Screen management */
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .active-screen {
+            display: flex;
+            z-index: 10;
+        }
+
+        /* Main Menu Styles */
+        .menu-container {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            z-index: 5;
+        }
+
+        .microbe-icon {
+            font-size: 5rem;
+            margin-bottom: 10px;
+            animation: float 3s ease-in-out infinite;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        h1 {
+            color: #ffffff;
+            font-size: 2.8rem;
+            margin-bottom: 30px;
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            letter-spacing: 1px;
+        }
+
+        .menu-btn {
+            background-color: #ffffff;
+            color: #27ae60;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 40px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            transition: all 0.2s ease;
+            margin-bottom: 15px;
+            width: 220px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .menu-btn:hover {
+            transform: translateY(-3px);
+            background-color: #f1f2f6;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+        }
+
+        .menu-btn:active {
+            transform: translateY(1px);
+        }
+
+        .menu-shop-btn {
+            background-color: #e67e22;
+            color: #ffffff;
+            width: 190px;
+            padding: 12px 30px;
+            font-size: 1.15rem;
+        }
+
+        .menu-shop-btn:hover {
+            background-color: #d35400;
+        }
+
+        .index-btn {
+            background-color: rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            width: 180px;
+        }
+
+        .index-btn:hover {
+            background-color: rgba(255, 255, 255, 0.5);
+            color: #ffffff;
+        }
+
+        /* Generic Container Styles */
+        .container-box {
+            position: relative;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 90%;
+            max-width: 450px;
+            max-height: 90vh;
+            padding: 50px 20px 70px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 5;
+        }
+
+        .screen-title {
+            color: #ffffff;
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .dishes-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 10px;
+            width: 100%;
+            max-height: 320px;
+            overflow-y: auto;
+            padding: 5px;
+            position: relative;
+            z-index: 5;
+        }
+
+        .dish-box {
+            width: 100%;
+            height: 95px;
+            background-color: #bdc3c7;
+            border: 2px solid #7f8c8d;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #2c3e50;
+            font-weight: bold;
+            font-size: 0.8rem;
+            text-align: center;
+            box-shadow: inset 0 3px 5px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+            cursor: pointer;
+            padding: 4px;
+            position: relative;
+            z-index: 6;
+            overflow: hidden;
+        }
+
+        .dish-box:hover {
+            transform: scale(1.03);
+            background-color: #cacfd2;
+        }
+
+        .dish-box.locked {
+            background-color: #95a5a6;
+            color: #7f8c8d;
+            font-size: 1.5rem;
+        }
+
+        .dish-microbe {
+            font-size: 1.5rem;
+            animation: float 2s ease-in-out infinite;
+        }
+
+        .dish-status {
+            font-size: 0.65rem;
+            margin-top: 2px;
+            font-weight: bold;
+        }
+
+        .dish-status.ready {
+            color: #27ae60;
+        }
+
+        .dish-status.growing {
+            color: #d35400;
+        }
+
+        /* Bag Category Grid */
+        .bag-categories-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            margin-top: 10px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .bag-cat-btn {
+            background-color: #ffffff;
+            color: #145a32;
+            border: none;
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            transition: transform 0.1s, background 0.2s;
+            position: relative;
+            z-index: 15;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .bag-cat-btn:hover {
+            transform: scale(1.02);
+            background-color: #f1f2f6;
+        }
+
+        /* Bag Inventory Grid */
+        .bag-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            justify-content: center;
+            width: 100%;
+            max-height: 330px;
+            overflow-y: auto;
+            padding: 5px;
+            position: relative;
+            z-index: 5;
+        }
+
+        .sample-card {
+            background-color: #95a5a6;
+            border: 2px solid #7f8c8d;
+            border-radius: 12px;
+            height: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            box-shadow: inset 0 3px 5px rgba(0,0,0,0.15);
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+
+        .sample-card:hover {
+            transform: scale(1.03);
+            background-color: #a6b2b3;
+        }
+
+        .sample-microbe {
+            font-size: 2rem;
+        }
+
+        .sample-info {
+            text-align: center;
+            width: 100%;
+        }
+
+        .sample-title-text {
+            color: #ffffff;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .sample-location-text {
+            color: #ecf0f1;
+            font-size: 0.7rem;
+            opacity: 0.9;
+        }
+
+        .mutation-ability-text {
+            color: #f1c40f;
+            font-size: 0.6rem;
+            margin-top: 2px;
+            line-height: 1.1;
+        }
+
+        .empty-bag-msg {
+            color: #ffffff;
+            font-size: 0.85rem;
+            opacity: 0.85;
+            margin-top: 40px;
+            grid-column: span 2;
+        }
+
+        /* Search Bar */
+        .search-input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255, 255, 255, 0.9);
+            color: #2c3e50;
+            font-size: 0.95rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+            outline: none;
+        }
+
+        /* Sample Info Screen Layout */
+        .sample-info-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.25);
+            border: 2px solid #196f3d;
+            border-radius: 15px;
+            padding: 20px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .big-bobbing-microbe {
+            font-size: 4.5rem;
+            animation: float 3s ease-in-out infinite;
+            margin-right: 15px;
+        }
+
+        .sample-stats {
+            text-align: left;
+            color: #ffffff;
+            font-size: 1.05rem;
+            font-weight: 600;
+            line-height: 1.6;
+        }
+
+        /* Currency Display Header */
+        .currency-display {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #f1c40f;
+            padding: 6px 14px;
+            border-radius: 15px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 25;
+        }
+
+        /* Shop Button (Bottom Left) */
+        .shop-btn {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            background-color: #e67e22;
+            color: #ffffff;
+            border: none;
+            border-radius: 15px;
+            padding: 10px 18px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+            z-index: 20;
+        }
+
+        .shop-btn:hover {
+            background-color: #d35400;
+            transform: translateY(-2px);
+        }
+
+        /* Shop Category Cards */
+        .shop-section-title {
+            color: #f1c40f;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin: 10px 0 5px 0;
+            text-align: left;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .shop-item-card {
+            background-color: #ffffff;
+            color: #145a32;
+            border-radius: 10px;
+            padding: 10px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transition: transform 0.1s;
+            width: 100%;
+        }
+
+        .shop-item-card:hover {
+            transform: scale(1.02);
+            background-color: #f1f2f6;
+        }
+
+        /* Minigame Map Styles */
+        .minigame-container {
+            position: relative;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 95%;
+            max-width: 500px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 5;
+        }
+
+        .minigame-header {
+            color: #ffffff;
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+        }
+
+        .game-map {
+            width: 440px;
+            height: 240px;
+            background-color: #145a32;
+            border: 3px solid #0e3a1f;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 5px 10px rgba(0,0,0,0.4);
+            margin-bottom: 15px;
+        }
+
+        .game-entity {
+            position: absolute;
+            font-size: 1.2rem;
+            user-select: none;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Joy-Con D-Pad Layout Style */
+        .joycon-dpad {
+            display: grid;
+            grid-template-columns: repeat(3, 50px);
+            grid-template-rows: repeat(3, 50px);
+            gap: 4px;
+            justify-content: center;
+            align-items: center;
+            margin-top: 5px;
+        }
+
+        .dpad-btn {
+            background-color: #ffffff;
+            color: #145a32;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .dpad-btn:hover {
+            background-color: #eaeded;
+            transform: translateY(-2px);
+        }
+
+        .dpad-btn:active {
+            transform: translateY(1px);
+        }
+
+        .action-styled-btn {
+            background-color: #ffffff;
+            color: #145a32;
+            border: none;
+            border-radius: 25px;
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+        }
+
+        .action-styled-btn:hover {
+            background-color: #f1f2f6;
+            transform: translateY(-2px);
+        }
+
+        /* Red notification dot styling */
+        .red-dot {
+            position: absolute;
+            top: 4px;
+            right: 6px;
+            width: 10px;
+            height: 10px;
+            background-color: #e74c3c;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            display: none;
+            z-index: 30;
+        }
+
+        .shop-btn .red-dot {
+            top: 2px;
+            right: 2px;
+        }
+
+        .menu-shop-btn .red-dot {
+            top: 4px;
+            right: 12px;
+        }
+
+        .sample-card .red-dot {
+            top: 6px;
+            right: 6px;
+        }
+
+        /* Top-Left Back Button */
+        .back-btn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background-color: rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+            border: none;
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            z-index: 20;
+        }
+
+        .back-btn:hover {
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Top-Right Bag Button */
+        .bag-btn {
+            position: absolute;
+            top: 15px;
+            right: 85px;
+            background-color: rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+            border: none;
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            z-index: 20;
+        }
+
+        .bag-btn:hover {
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Bottom-Right Explore Button */
+        .explore-btn {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            background-color: #f39c12;
+            color: #ffffff;
+            border: none;
+            border-radius: 15px;
+            padding: 10px 18px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+            z-index: 20;
+        }
+
+        .explore-btn:hover {
+            background-color: #d68910;
+            transform: translateY(-2px);
+        }
+
+        /* Explore Menu Screen */
+        .explore-menu-container {
+            position: relative;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 90%;
+            max-width: 400px;
+            padding: 60px 20px 30px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 5;
+        }
+
+        .biomes-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            margin-top: 10px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .biome-btn {
+            background-color: #ffffff;
+            color: #145a32;
+            border: none;
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            transition: transform 0.1s, background 0.2s;
+            position: relative;
+            z-index: 15;
+        }
+
+        .biome-btn:hover {
+            transform: scale(1.02);
+            background-color: #f1f2f6;
+        }
+
+        .biome-btn.locked-biome {
+            background-color: #95a5a6;
+            color: #7f8c8d;
+            font-size: 1.4rem;
+            cursor: not-allowed;
+        }
+
+        .biome-btn.locked-biome:hover {
+            transform: none;
+            background-color: #95a5a6;
+        }
+
+        /* Forest Screen Styles */
+        .forest-container {
+            position: relative;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 95%;
+            max-width: 600px;
+            padding: 50px 20px 20px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 5;
+        }
+
+        .forest-title {
+            color: #ffffff;
+            font-size: 2rem;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .forest-viewport {
+            width: 100%;
+            height: 180px;
+            background-color: #145a32;
+            border: 3px solid #0e3a1f;
+            border-radius: 15px;
+            overflow-x: hidden;
+            overflow-y: hidden;
+            position: relative;
+            box-shadow: inset 0 5px 10px rgba(0,0,0,0.4);
+            margin-bottom: 15px;
+            white-space: nowrap;
+            z-index: 6;
+        }
+
+        .forest-world {
+            position: relative;
+            width: 1500px;
+            height: 100%;
+        }
+
+        .forest-ground {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 35px;
+            background-color: #0b3c1d;
+            border-top: 2px solid #196f3d;
+        }
+
+        .forest-item {
+            position: absolute;
+            bottom: 20px;
+            user-select: none;
+        }
+
+        .tiny-microbe {
+            position: absolute;
+            top: 2px;
+            right: 4px;
+            font-size: 0.7rem;
+        }
+
+        .trap-item {
+            position: absolute;
+            bottom: 20px;
+            font-size: 1.3rem;
+            user-select: none;
+            z-index: 8;
+        }
+
+        .sky-object {
+            position: absolute;
+            user-select: none;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* Sliding Green Hint Box Styles */
+        #hint-box {
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #0b3c1d;
+            color: #2ecc71;
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border: 1px solid #196f3d;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: top 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 25;
+        }
+
+        #hint-box.show {
+            top: 12px;
+        }
+
+        #player {
+            position: absolute;
+            bottom: 20px;
+            left: 750px;
+            font-size: 1.6rem;
+            z-index: 10;
+        }
+
+        #notification {
+            height: 25px;
+            color: #f1c40f;
+            font-weight: 900;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+        }
+
+        .forest-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            position: relative;
+            z-index: 20;
+        }
+
+        .control-btn {
+            background-color: #ffffff;
+            color: #145a32;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 22px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            user-select: none;
+            -webkit-user-select: none;
+            transition: background 0.2s, transform 0.1s;
+            position: relative;
+            z-index: 25;
+        }
+
+        .control-btn:hover {
+            background-color: #eaeded;
+            transform: translateY(-2px);
+        }
+
+        .control-btn:active {
+            transform: translateY(1px);
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- MAIN MENU SCREEN -->
+    <div id="menu-screen" class="screen active-screen">
+        <div id="currency-main" class="currency-display">🔘: 500</div>
+
+        <div class="menu-container">
+            <div class="microbe-icon" onclick="handleTitleMicrobeClick()">🦠</div>
+            <h1>Microbe Lab</h1>
+            <button class="menu-btn" onclick="switchScreen('lab-screen')">🎮 PLAY!</button>
+            <button class="menu-btn menu-shop-btn" onclick="openShopMain()">
+                🏪 Shop
+                <span id="shop-global-dot" class="red-dot"></span>
+            </button>
+            <button class="menu-btn index-btn" onclick="openIndexMain()">📖 Index</button>
+        </div>
+    </div>
+
+    <!-- SECRET CODE SCREEN -->
+    <div id="secret-code-screen" class="screen">
+        <div class="container-box">
+            <button class="back-btn" onclick="switchScreen('menu-screen')">← Menu</button>
+            <div class="screen-title" style="font-size: 1.8rem; margin-bottom: 20px;">📜 Enter Code Here...</div>
+            <input type="text" id="secret-code-input" class="search-input" placeholder="Type secret code...">
+            <button class="action-styled-btn" style="width: 100%; margin-top: 10px;" onclick="submitSecretCode()">Submit Code</button>
+        </div>
+    </div>
+
+    <!-- SHOP MAIN SCREEN -->
+    <div id="shop-main-screen" class="screen">
+        <div id="currency-shop" class="currency-display">🔘: 500</div>
+        <div class="container-box">
+            <button class="back-btn" onclick="closeShopBack()">← Back</button>
+            <div class="screen-title">🏪 Shop</div>
+            
+            <div class="bag-categories-grid">
+                <button class="bag-cat-btn" onclick="openShopBuy()">🛍️ Buy</button>
+                <button class="bag-cat-btn" onclick="openShopSell()">🏷️ Sell</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SHOP BUY SCREEN -->
+    <div id="shop-buy-screen" class="screen">
+        <div id="currency-buy" class="currency-display">🔘: 500</div>
+        <div class="container-box" style="max-width: 480px; max-height: 85vh;">
+            <button class="back-btn" onclick="openShopMain()">← Shop</button>
+            <div class="screen-title" style="font-size: 1.8rem; margin-bottom: 5px;">🛍️ Buy</div>
+            
+            <div style="width: 100%; overflow-y: auto; max-height: 380px; padding: 5px;" id="shop-buy-items-container"></div>
+        </div>
+    </div>
+
+    <!-- SHOP SELL SCREEN -->
+    <div id="shop-sell-screen" class="screen">
+        <div id="currency-sell" class="currency-display">🔘: 500</div>
+        <div class="container-box">
+            <button class="back-btn" onclick="openShopMain()">← Shop</button>
+            <div class="screen-title">🏷️ Sell</div>
+            
+            <div id="shop-sell-grid" class="bag-grid"></div>
+        </div>
+    </div>
+
+    <!-- INDEX MAIN MENU SCREEN -->
+    <div id="index-main-screen" class="screen">
+        <div class="container-box">
+            <button class="back-btn" onclick="switchScreen('menu-screen')">← Menu</button>
+            <div class="screen-title">📖 Index</div>
+            
+            <div class="bag-categories-grid">
+                <button class="bag-cat-btn" onclick="openIndexMicrobes()">🦠 Microbes</button>
+                <button class="bag-cat-btn" onclick="openIndexLocations()">🧭 Locations</button>
+                <button class="bag-cat-btn" onclick="openIndexMutations()">✨ Mutations</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- INDEX MICROBES SCREEN -->
+    <div id="index-microbes-screen" class="screen">
+        <div class="container-box">
+            <button class="back-btn" onclick="switchScreen('index-main-screen')">← Index</button>
+            <div class="screen-title">Microbes</div>
+            <input type="text" id="microbe-search" class="search-input" placeholder="Search microbes..." oninput="filterIndexMicrobes()">
+            <div id="index-microbes-grid" class="bag-grid"></div>
+        </div>
+    </div>
+
+    <!-- INDEX LOCATIONS SCREEN -->
+    <div id="index-locations-screen" class="screen">
+        <div class="container-box">
+            <button class="back-btn" onclick="switchScreen('index-main-screen')">← Index</button>
+            <div class="screen-title">Locations</div>
+            <div id="index-locations-grid" class="bag-grid"></div>
+        </div>
+    </div>
+
+    <!-- LOCATION DETAIL SCREEN -->
+    <div id="location-detail-screen" class="screen">
+        <div class="container-box" style="max-width: 500px;">
+            <button class="back-btn" onclick="switchScreen('index-locations-screen')">← Locations</button>
+            <div id="loc-detail-title" class="screen-title">Location</div>
+            
+            <div style="display: flex; gap: 15px; width: 100%; align-items: center; margin-top: 10px;">
+                <div style="font-size: 5rem; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 15px; border: 2px solid #196f3d;" id="loc-big-icon">🌲</div>
+                <div id="loc-microbes-grid" class="bag-grid" style="max-height: 250px; flex-grow: 1;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- INDEX MUTATIONS SCREEN -->
+    <div id="index-mutations-screen" class="screen">
+        <div class="container-box">
+            <button class="back-btn" onclick="switchScreen('index-main-screen')">← Index</button>
+            <div class="screen-title">Mutations</div>
+            <div id="index-mutations-grid" class="bag-grid"></div>
+        </div>
+    </div>
+
+    <!-- MUTATION DETAIL SCREEN -->
+    <div id="mutation-detail-screen" class="screen">
+        <div class="container-box">
+            <button class="back-btn" onclick="switchScreen('index-mutations-screen')">← Mutations</button>
+            <div id="mut-detail-title" class="screen-title">Mutation</div>
+            <div id="mut-microbes-grid" class="bag-grid"></div>
+        </div>
+    </div>
+
+    <!-- LAB SCREEN -->
+    <div id="lab-screen" class="screen">
+        <div id="currency-lab" class="currency-display">🔘: 500</div>
+        <button class="shop-btn" onclick="openShopMain()">
+            🏪 Shop
+            <span id="shop-global-dot-2" class="red-dot"></span>
+        </button>
+        <div class="container-box">
+            <button class="back-btn" onclick="switchScreen('menu-screen')">← Menu</button>
+            <button class="bag-btn" onclick="openBagMain()">
+                🎒 Bag
+                <span id="bag-global-dot" class="red-dot"></span>
+            </button>
+
+            <div class="screen-title">🧪 Lab</div>
+            
+            <div id="dishes-grid" class="dishes-grid"></div>
+
+            <button class="explore-btn" onclick="openExploreMenu()">🏕️ Explore</button>
+        </div>
+    </div>
+
+    <!-- PICK A SAMPLE SCREEN -->
+    <div id="pick-sample-screen" class="screen">
+        <div class="container-box">
+            <button class="back-btn" onclick="switchScreen('lab-screen')">← Lab</button>
+            <div class="screen-title">Pick a Sample</div>
+            
+            <div id="pick-sample-grid" class="bag-grid"></div>
+        </div>
+    </div>
+
+    <!-- CULTURE READY INFO SCREEN -->
+    <div id="culture-ready-screen" class="screen">
+        <div class="container-box">
+            <button class="back-btn" onclick="switchScreen('lab-screen')">← Lab</button>
+            <div class="screen-title">Culture Ready</div>
+            
+            <div class="sample-info-content">
+                <div class="big-bobbing-microbe">🦠</div>
+                <div id="culture-ready-stats" class="sample-stats"></div>
+            </div>
+            <button class="action-styled-btn" style="margin-top: 15px; width: 100%;" onclick="startMinigame()">Grow Into Culture</button>
+        </div>
+    </div>
+
+    <!-- MINIGAME SCREEN -->
+    <div id="minigame-screen" class="screen">
+        <div class="minigame-container">
+            <button class="back-btn" onclick="switchScreen('lab-screen')">Quit</button>
+            <div id="minigame-header" class="minigame-header">Grow 100 🦠 0 / 100</div>
+            
+            <div id="game-map" class="game-map"></div>
+
+            <div class="joycon-dpad">
+                <div></div>
+                <button class="dpad-btn" 
+                    onmousedown="setJoyconDir(0, -1)" onmouseup="clearJoyconDir()" onmouseleave="clearJoyconDir()"
+                    ontouchstart="setJoyconDir(0, -1); event.preventDefault();" ontouchend="clearJoyconDir()">⬆️</button>
+                <div></div>
+                <button class="dpad-btn" 
+                    onmousedown="setJoyconDir(-1, 0)" onmouseup="clearJoyconDir()" onmouseleave="clearJoyconDir()"
+                    ontouchstart="setJoyconDir(-1, 0); event.preventDefault();" ontouchend="clearJoyconDir()">⬅️</button>
+                <div class="dpad-btn" style="background-color: #27ae60; color: white; cursor: default;">🦠</div>
+                <button class="dpad-btn" 
+                    onmousedown="setJoyconDir(1, 0)" onmouseup="clearJoyconDir()" onmouseleave="clearJoyconDir()"
+                    ontouchstart="setJoyconDir(1, 0); event.preventDefault();" ontouchend="clearJoyconDir()">➡️</button>
+                <div></div>
+                <button class="dpad-btn" 
+                    onmousedown="setJoyconDir(0, 1)" onmouseup="clearJoyconDir()" onmouseleave="clearJoyconDir()"
+                    ontouchstart="setJoyconDir(0, 1); event.preventDefault();" ontouchend="clearJoyconDir()">⬇️</button>
+                <div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BAG MAIN MENU SCREEN -->
+    <div id="bag-main-screen" class="screen">
+        <div class="container-box">
+            <button class="back-btn" onclick="closeBag()">← Back</button>
+            <div class="screen-title">🎒 Bag</div>
+            
+            <div class="bag-categories-grid">
+                <button class="bag-cat-btn" onclick="openCategory('wild')">
+                    🦠 Wild Samples
+                    <span id="cat-wild-dot" class="red-dot"></span>
+                </button>
+                <button class="bag-cat-btn" onclick="openCategory('cultured')">
+                    🧪 Cultured Samples
+                    <span id="cat-cultured-dot" class="red-dot"></span>
+                </button>
+                <button class="bag-cat-btn" onclick="openCategory('food')">
+                    🌱 Microbe Food
+                    <span id="cat-food-dot" class="red-dot"></span>
+                </button>
+                <button class="bag-cat-btn" onclick="openCategory('items')">
+                    💼 Items
+                    <span id="cat-items-dot" class="red-dot"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BAG SUB-CATEGORY VIEW SCREEN -->
+    <div id="bag-category-screen" class="screen">
+        <div class="container-box">
+            <button class="back-btn" onclick="switchScreen('bag-main-screen')">← Bag</button>
+            <div id="bag-cat-title" class="screen-title">Category</div>
+            
+            <div id="bag-grid" class="bag-grid"></div>
+        </div>
+    </div>
+
+    <!-- SAMPLE INFO SCREEN -->
+    <div id="sample-info-screen" class="screen">
+        <div class="container-box">
+            <button class="back-btn" onclick="handleBackFromSampleInfo()">← Back</button>
+            <div class="screen-title">Sample Info</div>
+            
+            <div class="sample-info-content">
+                <div class="big-bobbing-microbe">🦠</div>
+                <div id="sample-stats" class="sample-stats"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CULTURED SAMPLE INFO SCREEN -->
+    <div id="cultured-info-screen" class="screen">
+        <div class="container-box">
+            <button class="back-btn" onclick="handleBackFromCulturedInfo()">← Back</button>
+            <div class="screen-title">Culture Info</div>
+            
+            <div class="sample-info-content">
+                <div class="big-bobbing-microbe">🦠</div>
+                <div id="cultured-stats" class="sample-stats"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ACTION TARGET PICKER POPUP SCREEN -->
+    <div id="action-target-screen" class="screen">
+        <div class="container-box">
+            <button class="back-btn" onclick="switchScreen('bag-category-screen')">← Back</button>
+            <div id="target-screen-title" class="screen-title">Select Target</div>
+            
+            <div id="target-picker-grid" class="bag-grid"></div>
+        </div>
+    </div>
+
+    <!-- EXPLORE MENU SCREEN -->
+    <div id="explore-menu-screen" class="screen">
+        <div class="explore-menu-container">
+            <button class="back-btn" onclick="switchScreen('lab-screen')">← Lab</button>
+            <button class="bag-btn" onclick="openBagMain()">
+                🎒 Bag
+                <span id="bag-global-dot-2" class="red-dot"></span>
+            </button>
+
+            <div class="screen-title" style="margin-top: 10px;">Select Biome</div>
+            
+            <div class="biomes-grid" id="biomes-grid-container"></div>
+        </div>
+    </div>
+
+    <!-- FOREST SCREEN -->
+    <div id="forest-screen" class="screen">
+        <div class="forest-container">
+            <button class="back-btn" onclick="openExploreMenu()">← Explore</button>
+            <button class="bag-btn" onclick="openBagMain()">
+                🎒 Bag
+                <span id="bag-global-dot-3" class="red-dot"></span>
+            </button>
+
+            <div class="forest-title" id="active-biome-title">🌲 Forest 🌲</div>
+            
+            <div id="forest-viewport" class="forest-viewport">
+                <div id="hint-box">???</div>
+
+                <div class="forest-world" id="forest-world">
+                    <div class="forest-ground"></div>
+                    <div id="player">🧍</div>
+                </div>
+            </div>
+
+            <div id="notification"></div>
+
+            <div class="forest-controls">
+                <button class="control-btn" 
+                    onmousedown="startMoving(-1)" onmouseup="stopMoving()" onmouseleave="stopMoving()"
+                    ontouchstart="startMoving(-1); event.preventDefault();" ontouchend="stopMoving()">⬅️</button>
+                
+                <button class="control-btn" onclick="inspectTree()">🔎</button>
+                
+                <button class="control-btn" 
+                    onmousedown="startMoving(1)" onmouseup="stopMoving()" onmouseleave="stopMoving()"
+                    ontouchstart="startMoving(1); event.preventDefault();" ontouchend="stopMoving()">➡️</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentScreen = 'menu-screen';
+        let previousScreen = 'lab-screen';
+        let returnToIndexFromInfo = false;
+        let currency = 500;
+        let hasInfiniteCurrency = false;
+        let titleMicrobeClicks = 0;
+
+        let playerX = 750;
+        let playerVelocity = 0;
+        let targetVelocity = 0;
+        let scrollX = 750 - 250;
+        let treesData = [];
+        let placedTraps = {}; 
+        let activeBiome = 'Forest';
+        let forestRefreshInterval = null;
+
+        // Mutation Database with abilities, locations, and individual rarity valuation
+        const mutationData = {
+            // Forest
+            'Lightweight': { ability: 'Movement speed is 1.5x', location: 'Forest', value: 40 },
+            'Heavy': { ability: 'Movement speed 50%, food worth 2 🦠', location: 'Forest', value: 40 },
+            'Florescent': { ability: 'Food spawns 25% faster', location: 'Forest', value: 50 },
+            'Overgrown': { ability: 'Start with double amount of 🦠', location: 'Forest', value: 60 },
+            'Dried': { ability: '🍂 spawns more often', location: 'Forest', value: 30 },
+            // Rainforest
+            'Tropical': { ability: 'Food spawns 35% faster, worth 2 🦠', location: 'Rainforest', value: 90 },
+            'Nutty': { ability: '🍂, 🌿 and 🍀 worth 3 🦠', location: 'Rainforest', value: 110 },
+            'Noisy': { ability: 'Food spawns 15% slower, worth 3 🦠', location: 'Rainforest', value: 80 },
+            'Isolated': { ability: 'Food spawns slower, worth 2 🦠, speed 1.5x', location: 'Rainforest', value: 100 },
+            'Sweet And Sour': { ability: '1 in 2 food worth 0, speed +30%', location: 'Rainforest', value: 95 },
+            // Mossy Cave
+            'Erratic': { ability: 'Speed 1.5x, food spawns 50% faster', location: 'Mossy Cave', value: 160 },
+            'Magnetic': { ability: 'Nearest 🦠 magnetizes food every 5s', location: 'Mossy Cave', value: 180 },
+            'Mossy Shell': { ability: 'Speed 30% slower, worth 1.2x more', location: 'Mossy Cave', value: 140 },
+            'Golden': { ability: 'Cultured sample worth 2x price', location: 'Mossy Cave', value: 350 },
+            'Crystallized': { ability: 'Food worth 3 🦠 more, speed -25%', location: 'Mossy Cave', value: 200 },
+            // Mushroom Forest
+            'Fungal': { ability: '🍄 and 🍂 worth 5 🦠', location: 'Mushroom Forest', value: 280 },
+            'Infectious': { ability: 'Food worth 3-5 🦠 at random', location: 'Mushroom Forest', value: 320 },
+            'Destructive': { ability: '75% chance 0 value, but worth 5 🦠', location: 'Mushroom Forest', value: 250 },
+            'Translucent': { ability: 'Every 🦠 on map 25% transparent', location: 'Mushroom Forest', value: 300 }
+        };
+
+        let inventory = {
+            wild: [],
+            cultured: [],
+            food: [],
+            items: []
+        };
+
+        let shopUnlocks = {
+            maps: {
+                'Rainforest': false,
+                'Mossy Cave': false,
+                'Mushroom Forest': false,
+                'Microverse': false
+            },
+            dishesPurchasedCount: 0
+        };
+
+        let indexRegistry = {
+            microbes: new Set(),
+            locations: new Set(['Forest']),
+            mutations: new Set()
+        };
+
+        let dishes = [];
+        for (let i = 0; i < 15; i++) {
+            dishes.push({
+                id: i,
+                unlocked: i < 3,
+                sample: null,
+                timeLeft: 0,
+                status: 'empty',
+                mutation: 'None',
+                targetGoal: 50
+            });
+        }
+
+        let selectedDishIndex = null;
+        let activeCultureDish = null;
+
+        let gameLoopInterval = null;
+        let foodSpawnTimer = 0;
+        let microbes = [];
+        let foodList = [];
+        let joyconDir = null;
+        let currentGoal = 50;
+        let currentCount = 0;
+        let activeMutation = 'None';
+
+        const acceleration = 0.2; 
+        const friction = 0.92;     
+        const maxSpeed = 4.0;
+        const playerBaseSize = 1.6;
+
+        const player = document.getElementById('player');
+        const viewport = document.getElementById('forest-viewport');
+        const hintBox = document.getElementById('hint-box');
+        const notification = document.getElementById('notification');
+
+        function areAllMutationsDiscovered() {
+            let allKeys = Object.keys(mutationData);
+            return allKeys.every(m => indexRegistry.mutations.has(m));
+        }
+
+        function switchScreen(screenId) {
+            stopMoving();
+            const screens = document.querySelectorAll('.screen');
+            screens.forEach(screen => {
+                screen.classList.remove('active-screen');
+            });
+            document.getElementById(screenId).classList.add('active-screen');
+            currentScreen = screenId;
+            
+            updateCurrencyUI();
+            updateShopRedDots();
+
+            if(screenId === 'lab-screen') {
+                renderLabDishes();
+                stopForestRefreshTimer();
+            } else if(screenId === 'forest-screen') {
+                playerX = 750;
+                playerVelocity = 0;
+                targetVelocity = 0;
+                player.style.left = playerX + 'px';
+                notification.textContent = '';
+                
+                initForest();
+                startForestRefreshTimer();
+                
+                scrollX = playerX - viewport.clientWidth / 2;
+                viewport.scrollLeft = Math.round(scrollX);
+                
+                startForestLoop();
+            } else {
+                stopForestRefreshTimer();
+                stopForestLoop();
+                if(screenId === 'minigame-screen') {
+                    initMinigame();
+                } else {
+                    stopMinigame();
+                }
+            }
+            updateNotificationDots();
+        }
+
+        function updateCurrencyUI() {
+            let displayVal = hasInfiniteCurrency ? '🔘: ∞' : `🔘: ${currency}`;
+            document.querySelectorAll('#currency-main, #currency-shop, #currency-buy, #currency-sell, #currency-lab').forEach(el => {
+                if (el) el.textContent = displayVal;
+            });
+        }
+
+        function updateShopRedDots() {
+            let showDot = areAllMutationsDiscovered();
+            document.querySelectorAll('#shop-global-dot, #shop-global-dot-2').forEach(dot => {
+                dot.style.display = showDot ? 'block' : 'none';
+            });
+        }
+
+        function handleTitleMicrobeClick() {
+            titleMicrobeClicks++;
+            if (titleMicrobeClicks >= 15) {
+                titleMicrobeClicks = 0;
+                switchScreen('secret-code-screen');
+            }
+        }
+
+        function submitSecretCode() {
+            let codeInput = document.getElementById('secret-code-input').value.trim();
+            if (codeInput === 'INFCAPS') {
+                hasInfiniteCurrency = true;
+                currency = 999999;
+                updateCurrencyUI();
+                alert('Cheat Activated: Infinite Currency!');
+                switchScreen('menu-screen');
+            } else if (codeInput === 'INFSEARCH') {
+                shopUnlocks.maps['Rainforest'] = true;
+                shopUnlocks.maps['Mossy Cave'] = true;
+                shopUnlocks.maps['Mushroom Forest'] = true;
+                shopUnlocks.maps['Microverse'] = true;
+                indexRegistry.locations.add('Forest');
+                indexRegistry.locations.add('Rainforest');
+                indexRegistry.locations.add('Mossy Cave');
+                indexRegistry.locations.add('Mushroom Forest');
+                indexRegistry.locations.add('Microverse');
+
+                Object.keys(mutationData).forEach(m => indexRegistry.mutations.add(m));
+
+                Object.keys(mutationData).forEach((m, idx) => {
+                    inventory.cultured.push({
+                        name: `Sample Microbe #${idx + 1}`,
+                        location: mutationData[m].location,
+                        size: 'Normal',
+                        amount: 50,
+                        mutation: m,
+                        mutationsList: [m],
+                        isNew: true
+                    });
+                    indexRegistry.microbes.add(`Sample Microbe #${idx + 1}`);
+                });
+
+                alert('Cheat Activated: All Index items, mutations, and locations discovered!');
+                switchScreen('menu-screen');
+            } else {
+                alert('Invalid Code!');
+            }
+        }
+
+        function openShopMain() {
+            stopMoving();
+            switchScreen('shop-main-screen');
+        }
+
+        function closeShopBack() {
+            if (previousScreen === 'forest-screen') switchScreen('forest-screen');
+            else if (previousScreen === 'lab-screen') switchScreen('lab-screen');
+            else switchScreen('menu-screen');
+        }
+
+        function openShopBuy() {
+            renderShopBuyCatalog();
+            switchScreen('shop-buy-screen');
+        }
+
+        function renderShopBuyCatalog() {
+            const container = document.getElementById('shop-buy-items-container');
+            container.innerHTML = '';
+
+            let itemsHeader = document.createElement('div');
+            itemsHeader.className = 'shop-section-title';
+            itemsHeader.textContent = '💼 Items';
+            container.appendChild(itemsHeader);
+
+            addShopCard(container, '🔄 Instant Refresh', '150 🔘', () => buyItem('item', 'Instant Refresh', 150, {type: 'refresh'}));
+            addShopCard(container, '🪤 Microbe Trap (5 uses)', '350 🔘', () => buyItem('item', 'Microbe Trap', 350, {type: 'trap', uses: 5}));
+            addShopCard(container, '🍀 Luck Boost (+5 min)', '150 🔘', () => buyItem('item', 'Luck Boost', 150, {type: 'luck', duration: 300}));
+
+            let foodHeader = document.createElement('div');
+            foodHeader.className = 'shop-section-title';
+            foodHeader.textContent = '🌱 Microbe Food';
+            container.appendChild(foodHeader);
+
+            addShopCard(container, '💉 Instant Growth Serum', '250 🔘', () => buyItem('food', 'Instant Growth Serum', 250, {type: 'instant_growth'}));
+            addShopCard(container, '🧬 Mutation Serum', '350 🔘', () => buyItem('food', 'Mutation Serum', 350, {type: 'mutation_serum'}));
+            addShopCard(container, '📈 Size Growth Serum', '300 🔘', () => buyItem('food', 'Size Growth Serum', 300, {type: 'size_serum'}));
+
+            let mysteryHeader = document.createElement('div');
+            mysteryHeader.className = 'shop-section-title';
+            mysteryHeader.textContent = '❔ Mystery Cultures';
+            container.appendChild(mysteryHeader);
+
+            addShopCard(container, '🧪 Mystery Culture', '250 🔘', () => buyMysteryCulture());
+
+            if (shopUnlocks.dishesPurchasedCount < 9) {
+                let dishHeader = document.createElement('div');
+                dishHeader.className = 'shop-section-title';
+                dishHeader.textContent = '💿 Buy Dishes';
+                container.appendChild(dishHeader);
+
+                addShopCard(container, '💿 +1 Empty Dish', '350 🔘', () => buyEmptyDish());
+            }
+
+            let lockedMaps = Object.keys(shopUnlocks.maps).filter(m => !shopUnlocks.maps[m]);
+            let allMutationsUnlocked = areAllMutationsDiscovered();
+
+            if (lockedMaps.length > 0 || allMutationsUnlocked) {
+                let mapHeader = document.createElement('div');
+                mapHeader.className = 'shop-section-title';
+                
+                let mapDotHTML = allMutationsUnlocked ? '<span class="red-dot" style="position:relative; top:0; right:0; display:inline-block; margin-left:5px;"></span>' : '';
+                mapHeader.innerHTML = `🗺️ Maps ${mapDotHTML}`;
+                container.appendChild(mapHeader);
+
+                if (!shopUnlocks.maps['Rainforest']) {
+                    addShopCard(container, '🌴 Rainforest', '500 🔘', () => buyMap('Rainforest', 500));
+                }
+                if (!shopUnlocks.maps['Mossy Cave']) {
+                    addShopCard(container, '🌿 Mossy Cave', '1,000 🔘', () => buyMap('Mossy Cave', 1000));
+                }
+                if (!shopUnlocks.maps['Mushroom Forest']) {
+                    addShopCard(container, '🍄 Mushroom Forest', '1,500 🔘', () => buyMap('Mushroom Forest', 1500));
+                }
+                if (!shopUnlocks.maps['Microverse'] && allMutationsUnlocked) {
+                    addShopCard(container, '🔮 Microverse', '2,500 🔘', () => buyMap('Microverse', 2500));
+                }
+            }
+        }
+
+        function addShopCard(parent, title, priceStr, callback) {
+            let card = document.createElement('div');
+            card.className = 'shop-item-card';
+            card.innerHTML = `<span>${title}</span><span>${priceStr}</span>`;
+            card.onclick = callback;
+            parent.appendChild(card);
+        }
+
+        function buyItem(categoryKey, name, cost, meta) {
+            if (!hasInfiniteCurrency && currency < cost) return;
+            if (!hasInfiniteCurrency) currency -= cost;
+            updateCurrencyUI();
+
+            inventory.items.push({
+                name: name,
+                location: 'Shop',
+                size: 'Item',
+                meta: meta,
+                isNew: true
+            });
+            alert('Purchase Completed!');
+            updateNotificationDots();
+        }
+
+        function buyMysteryCulture() {
+            let cost = 250;
+            if (!hasInfiniteCurrency && currency < cost) return;
+            if (!hasInfiniteCurrency) currency -= cost;
+            updateCurrencyUI();
+
+            const poolSizes = ['Tiny', 'Small', 'Normal', 'Large', 'Mega'];
+            const mutKeys = Object.keys(mutationData);
+            const poolNames = ['Alpha Microbe', 'Beta Spore', 'Gamma Bacilli', 'Delta Strain', 'Omega Cell', 'Glow Spore', 'Titan Microbe'];
+
+            let randSize = poolSizes[Math.floor(Math.random() * poolSizes.length)];
+            let randMut = mutKeys[Math.floor(Math.random() * mutKeys.length)];
+            let randLoc = mutationData[randMut] ? mutationData[randMut].location : 'Forest';
+            let randName = poolNames[Math.floor(Math.random() * poolNames.length)];
+
+            inventory.cultured.push({
+                name: randName,
+                location: randLoc,
+                size: randSize,
+                amount: Math.floor(Math.random() * 50) + 25,
+                mutation: randMut,
+                sizeRank: 1,
+                mutationsList: [randMut],
+                isNew: true
+            });
+
+            indexRegistry.microbes.add(randName);
+            indexRegistry.mutations.add(randMut);
+            indexRegistry.locations.add(randLoc);
+
+            alert('Purchase Completed! Mystery Culture added to your Cultured Samples.');
+            updateNotificationDots();
+        }
+
+        function buyEmptyDish() {
+            let cost = 350;
+            if (!hasInfiniteCurrency && currency < cost) return;
+            if (!hasInfiniteCurrency) currency -= cost;
+            updateCurrencyUI();
+
+            shopUnlocks.dishesPurchasedCount++;
+            let lockedDish = dishes.find(d => !d.unlocked);
+            if (lockedDish) lockedDish.unlocked = true;
+
+            alert('Purchase Completed! +1 Empty Dish unlocked in the Lab.');
+            renderShopBuyCatalog();
+        }
+
+        function buyMap(mapName, cost) {
+            if (!hasInfiniteCurrency && currency < cost) return;
+            if (!hasInfiniteCurrency) currency -= cost;
+            updateCurrencyUI();
+
+            shopUnlocks.maps[mapName] = true;
+            indexRegistry.locations.add(mapName);
+
+            alert(`Purchase Completed! ${mapName} biome unlocked.`);
+            renderShopBuyCatalog();
+        }
+
+        function calculateCultureSellPrice(culture) {
+            let locationBase = 80;
+            if (culture.location === 'Rainforest') locationBase = 150;
+            else if (culture.location === 'Mossy Cave') locationBase = 250;
+            else if (culture.location === 'Mushroom Forest') locationBase = 400;
+            else if (culture.location === 'Microverse') locationBase = 650;
+
+            let sizeMult = 1.0;
+            if (culture.size === 'Tiny') sizeMult = 0.8;
+            else if (culture.size === 'Small') sizeMult = 1.0;
+            else if (culture.size === 'Normal') sizeMult = 1.25;
+            else if (culture.size === 'Large') sizeMult = 1.6;
+            else if (culture.size === 'Mega') sizeMult = 2.2;
+
+            let mutationBonusTotal = 0;
+            let mutList = culture.mutationsList || (culture.mutation && culture.mutation !== 'None' ? culture.mutation.split(', ') : []);
+            
+            mutList.forEach(mName => {
+                let cleanName = mName.trim();
+                if (mutationData[cleanName]) {
+                    mutationBonusTotal += mutationData[cleanName].value;
+                } else {
+                    mutationBonusTotal += 50;
+                }
+            });
+
+            let finalPrice = Math.round((locationBase * sizeMult) + mutationBonusTotal);
+            return Math.max(50, finalPrice);
+        }
+
+        function openShopSell() {
+            const grid = document.getElementById('shop-sell-grid');
+            grid.innerHTML = '';
+
+            if (inventory.cultured.length === 0) {
+                grid.innerHTML = '<div class="empty-bag-msg">No cultured samples to sell!</div>';
+            } else {
+                inventory.cultured.forEach((culture, index) => {
+                    let sellPrice = calculateCultureSellPrice(culture);
+
+                    const card = document.createElement('div');
+                    card.classList.add('sample-card');
+                    card.innerHTML = `
+                        <div class="sample-microbe">🦠</div>
+                        <div class="sample-info">
+                            <div class="sample-title-text">${culture.name}</div>
+                            <div class="sample-location-text">Sell: ${sellPrice} 🔘</div>
+                        </div>
+                    `;
+                    card.onclick = () => sellCulture(index, sellPrice);
+                    grid.appendChild(card);
+                });
+            }
+            switchScreen('shop-sell-screen');
+        }
+
+        function sellCulture(index, price) {
+            inventory.cultured.splice(index, 1);
+            if (!hasInfiniteCurrency) {
+                currency += price;
+            }
+            updateCurrencyUI();
+            alert(`Sold culture for ${price} 🔘!`);
+            openShopSell();
+        }
+
+        function openIndexMain() {
+            stopMoving();
+            switchScreen('index-main-screen');
+        }
+
+        function openIndexMicrobes() {
+            renderIndexMicrobesList(inventory.cultured);
+            switchScreen('index-microbes-screen');
+        }
+
+        function renderIndexMicrobesList(itemsList) {
+            const grid = document.getElementById('index-microbes-grid');
+            grid.innerHTML = '';
+
+            if (itemsList.length === 0) {
+                grid.innerHTML = '<div class="empty-bag-msg">No discovered microbes yet!</div>';
+                return;
+            }
+
+            itemsList.forEach((item) => {
+                const card = document.createElement('div');
+                card.classList.add('sample-card');
+                card.innerHTML = `
+                    <div class="sample-microbe">🦠</div>
+                    <div class="sample-info">
+                        <div class="sample-title-text">${item.name}</div>
+                        <div class="sample-location-text">${item.mutation || 'None'}</div>
+                    </div>
+                `;
+                card.onclick = () => {
+                    returnToIndexFromInfo = true;
+                    showCulturedInfo(item);
+                };
+                grid.appendChild(card);
+            });
+        }
+
+        function filterIndexMicrobes() {
+            let query = document.getElementById('microbe-search').value.toLowerCase();
+            let filtered = inventory.cultured.filter(item => item.name.toLowerCase().includes(query) || (item.mutation && item.mutation.toLowerCase().includes(query)));
+            renderIndexMicrobesList(filtered);
+        }
+
+        function openIndexLocations() {
+            const grid = document.getElementById('index-locations-grid');
+            grid.innerHTML = '';
+
+            let locs = Array.from(indexRegistry.locations);
+            locs.forEach(loc => {
+                const card = document.createElement('div');
+                card.classList.add('sample-card');
+                card.innerHTML = `
+                    <div class="sample-microbe">🧭</div>
+                    <div class="sample-info">
+                        <div class="sample-title-text">${loc}</div>
+                        <div class="sample-location-text">Unlocked Biome</div>
+                    </div>
+                `;
+                card.onclick = () => openLocationDetail(loc);
+                grid.appendChild(card);
+            });
+
+            switchScreen('index-locations-screen');
+        }
+
+        function openLocationDetail(locationName) {
+            document.getElementById('loc-detail-title').textContent = locationName;
+            document.getElementById('loc-big-icon').textContent = locationName === 'Rainforest' ? '🌴' : locationName === 'Mossy Cave' ? '🌿' : locationName === 'Mushroom Forest' ? '🍄' : locationName === 'Microverse' ? '🔮' : '🌲';
+
+            const grid = document.getElementById('loc-microbes-grid');
+            grid.innerHTML = '';
+
+            let foundMicrobes = inventory.cultured.filter(item => item.location === locationName);
+            if (foundMicrobes.length === 0) {
+                grid.innerHTML = '<div class="empty-bag-msg">No cultured microbes found here yet.</div>';
+            } else {
+                foundMicrobes.forEach(item => {
+                    const card = document.createElement('div');
+                    card.classList.add('sample-card');
+                    card.innerHTML = `
+                        <div class="sample-microbe">🦠</div>
+                        <div class="sample-info">
+                            <div class="sample-title-text">${item.name}</div>
+                            <div class="sample-location-text">${item.mutation}</div>
+                        </div>
+                    `;
+                    card.onclick = () => {
+                        returnToIndexFromInfo = true;
+                        showCulturedInfo(item);
+                    };
+                    grid.appendChild(card);
+                });
+            }
+
+            switchScreen('location-detail-screen');
+        }
+
+        function openIndexMutations() {
+            const grid = document.getElementById('index-mutations-grid');
+            grid.innerHTML = '';
+
+            let muts = Array.from(indexRegistry.mutations);
+            if (muts.length === 0) {
+                grid.innerHTML = '<div class="empty-bag-msg">No mutations discovered yet!</div>';
+            } else {
+                muts.forEach(mut => {
+                    let info = mutationData[mut] || { ability: 'Unknown ability', location: 'Unknown' };
+                    const card = document.createElement('div');
+                    card.classList.add('sample-card');
+                    card.style.height = '140px';
+                    card.innerHTML = `
+                        <div class="sample-microbe" style="font-size: 1.5rem;">✨</div>
+                        <div class="sample-info">
+                            <div class="sample-title-text">${mut}</div>
+                            <div class="mutation-ability-text">${info.ability}</div>
+                            <div class="sample-location-text" style="margin-top: 4px;">📍 ${info.location}</div>
+                        </div>
+                    `;
+                    card.onclick = () => openMutationDetail(mut);
+                    grid.appendChild(card);
+                });
+            }
+
+            switchScreen('index-mutations-screen');
+        }
+
+        function openMutationDetail(mutationName) {
+            document.getElementById('mut-detail-title').textContent = mutationName;
+            const grid = document.getElementById('mut-microbes-grid');
+            grid.innerHTML = '';
+
+            let matching = inventory.cultured.filter(item => item.mutation === mutationName || (item.mutationsList && item.mutationsList.includes(mutationName)));
+            if (matching.length === 0) {
+                grid.innerHTML = '<div class="empty-bag-msg">No cultured microbes have this mutation yet.</div>';
+            } else {
+                matching.forEach(item => {
+                    const card = document.createElement('div');
+                    card.classList.add('sample-card');
+                    card.innerHTML = `
+                        <div class="sample-microbe">🦠</div>
+                        <div class="sample-info">
+                            <div class="sample-title-text">${item.name}</div>
+                            <div class="sample-location-text">${item.location}</div>
+                        </div>
+                    `;
+                    card.onclick = () => {
+                        returnToIndexFromInfo = true;
+                        showCulturedInfo(item);
+                    };
+                    grid.appendChild(card);
+                });
+            }
+
+            switchScreen('mutation-detail-screen');
+        }
+
+        function handleBackFromSampleInfo() {
+            if (returnToIndexFromInfo) {
+                returnToIndexFromInfo = false;
+                switchScreen('index-microbes-screen');
+            } else {
+                switchScreen('bag-category-screen');
+            }
+        }
+
+        function handleBackFromCulturedInfo() {
+            if (returnToIndexFromInfo) {
+                returnToIndexFromInfo = false;
+                switchScreen('index-microbes-screen');
+            } else {
+                switchScreen('bag-category-screen');
+            }
+        }
+
+        function startForestRefreshTimer() {
+            if (forestRefreshInterval) clearInterval(forestRefreshInterval);
+            forestRefreshInterval = setInterval(() => {
+                if (currentScreen === 'forest-screen') {
+                    initForest();
+                }
+            }, 60000);
+        }
+
+        function stopForestRefreshTimer() {
+            if (forestRefreshInterval) clearInterval(forestRefreshInterval);
+        }
+
+        function rollMutationForBiome(biome) {
+            const mutKeys = Object.keys(mutationData);
+
+            if (biome === 'Microverse') {
+                let count = Math.floor(Math.random() * 3) + 1;
+                let chosenList = [];
+                while (chosenList.length < count) {
+                    let randMut = mutKeys[Math.floor(Math.random() * mutKeys.length)];
+                    if (!chosenList.includes(randMut)) {
+                        chosenList.push(randMut);
+                        indexRegistry.mutations.add(randMut);
+                    }
+                }
+                return chosenList.join(', ');
+            }
+
+            if (Math.random() > 0.20) return 'None';
+
+            let pool = [];
+            if (biome === 'Forest') {
+                pool = [
+                    { name: 'Lightweight', weight: 25 },
+                    { name: 'Heavy', weight: 25 },
+                    { name: 'Florescent', weight: 20 },
+                    { name: 'Overgrown', weight: 15 },
+                    { name: 'Dried', weight: 15 }
+                ];
+            } else if (biome === 'Rainforest') {
+                pool = [
+                    { name: 'Tropical', weight: 15 },
+                    { name: 'Nutty', weight: 20 },
+                    { name: 'Noisy', weight: 25 },
+                    { name: 'Isolated', weight: 15 },
+                    { name: 'Sweet And Sour', weight: 25 }
+                ];
+            } else if (biome === 'Mossy Cave') {
+                pool = [
+                    { name: 'Erratic', weight: 30 },
+                    { name: 'Magnetic', weight: 25 },
+                    { name: 'Mossy Shell', weight: 25 },
+                    { name: 'Golden', weight: 5 },
+                    { name: 'Crystallized', weight: 10 }
+                ];
+            } else if (biome === 'Mushroom Forest') {
+                pool = [
+                    { name: 'Fungal', weight: 15 },
+                    { name: 'Infectious', weight: 5 },
+                    { name: 'Destructive', weight: 20 },
+                    { name: 'Translucent', weight: 60 }
+                ];
+            }
+
+            let totalWeight = pool.reduce((sum, item) => sum + item.weight, 0);
+            let rand = Math.random() * totalWeight;
+            let current = 0;
+            for (let item of pool) {
+                current += item.weight;
+                if (rand <= current) {
+                    indexRegistry.mutations.add(item.name);
+                    return item.name;
+                }
+            }
+            indexRegistry.mutations.add(pool[0].name);
+            return pool[0].name;
+        }
+
+        setInterval(() => {
+            let updated = false;
+            dishes.forEach(dish => {
+                if (dish.status === 'growing' && dish.timeLeft > 0) {
+                    dish.timeLeft--;
+                    if (dish.timeLeft <= 0) {
+                        dish.status = 'ready';
+                        let biomeFound = dish.sample ? dish.sample.location : 'Forest';
+                        dish.mutation = rollMutationForBiome(biomeFound);
+
+                        let goal = 50;
+                        if (biomeFound === 'Forest') goal = 50;
+                        else if (biomeFound === 'Rainforest') goal = 100;
+                        else if (biomeFound === 'Mossy Cave') goal = 150;
+                        else if (biomeFound === 'Mushroom Forest') goal = 200;
+                        else if (biomeFound === 'Microverse') goal = 250;
+                        dish.targetGoal = goal;
+                    }
+                    updated = true;
+                }
+            });
+            if (updated && currentScreen === 'lab-screen') {
+                renderLabDishes();
+            }
+        }, 1000);
+
+        function renderLabDishes() {
+            const grid = document.getElementById('dishes-grid');
+            grid.innerHTML = '';
+
+            dishes.forEach((dish, index) => {
+                const box = document.createElement('div');
+                box.classList.add('dish-box');
+
+                if (!dish.unlocked) {
+                    box.classList.add('locked');
+                    box.innerHTML = '🔒';
+                } else if (dish.status === 'empty') {
+                    box.innerHTML = 'Empty Dish';
+                    box.onclick = () => clickDish(index);
+                } else if (dish.status === 'growing') {
+                    let mins = Math.floor(dish.timeLeft / 60);
+                    let secs = dish.timeLeft % 60;
+                    let timeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+                    box.innerHTML = `
+                        <div class="dish-microbe">🦠</div>
+                        <div class="dish-status growing">Growing... (${timeStr})</div>
+                    `;
+                    box.onclick = () => clickDish(index);
+                } else if (dish.status === 'ready') {
+                    box.innerHTML = `
+                        <div class="dish-microbe">🦠</div>
+                        <div class="dish-status ready">Culture Ready!</div>
+                    `;
+                    box.onclick = () => clickDish(index);
+                }
+
+                grid.appendChild(box);
+            });
+        }
+
+        function clickDish(index) {
+            let dish = dishes[index];
+            if (dish.status === 'empty') {
+                selectedDishIndex = index;
+                renderPickSampleList();
+                switchScreen('pick-sample-screen');
+            } else if (dish.status === 'growing') {
+                alert('Culture is still growing! Please wait.');
+            } else if (dish.status === 'ready') {
+                activeCultureDish = index;
+                showCultureReadyInfo(dish);
+            }
+        }
+
+        function showCultureReadyInfo(dish) {
+            const statsContainer = document.getElementById('culture-ready-stats');
+            statsContainer.innerHTML = `
+                Size: ${dish.sample.size}<br>
+                Location: ${dish.sample.location}<br>
+                Mutations: ${dish.mutation}
+            `;
+            switchScreen('culture-ready-screen');
+        }
+
+        function renderPickSampleList() {
+            const grid = document.getElementById('pick-sample-grid');
+            grid.innerHTML = '';
+
+            if (inventory.wild.length === 0) {
+                grid.innerHTML = '<div class="empty-bag-msg">No wild samples available! Explore biomes to collect some.</div>';
+                return;
+            }
+
+            inventory.wild.forEach((item, itemIndex) => {
+                const card = document.createElement('div');
+                card.classList.add('sample-card');
+                card.innerHTML = `
+                    <div class="sample-microbe">🦠</div>
+                    <div class="sample-info">
+                        <div class="sample-title-text">${item.name} (${item.size})</div>
+                        <div class="sample-location-text">${item.location}</div>
+                    </div>
+                `;
+                card.onclick = () => assignSampleToDish(itemIndex);
+                grid.appendChild(card);
+            });
+        }
+
+        function assignSampleToDish(itemIndex) {
+            let chosenSample = inventory.wild.splice(itemIndex, 1)[0];
+            
+            let duration = 10;
+            let loc = chosenSample.location;
+            if (loc === 'Forest') {
+                duration = Math.floor(Math.random() * 26) + 5;
+            } else if (loc === 'Rainforest') {
+                duration = Math.floor(Math.random() * 26) + 25;
+            } else if (loc === 'Mossy Cave') {
+                duration = Math.floor(Math.random() * 31) + 30;
+            } else if (loc === 'Mushroom Forest') {
+                duration = Math.floor(Math.random() * 41) + 35;
+            } else if (loc === 'Microverse') {
+                duration = 60;
+            }
+
+            dishes[selectedDishIndex].sample = chosenSample;
+            dishes[selectedDishIndex].timeLeft = duration;
+            dishes[selectedDishIndex].status = 'growing';
+
+            updateNotificationDots();
+            switchScreen('lab-screen');
+        }
+
+        function startMinigame() {
+            let dish = dishes[activeCultureDish];
+            let biomeFound = dish.sample ? dish.sample.location : 'Forest';
+            
+            if (biomeFound === 'Forest') currentGoal = 50;
+            else if (biomeFound === 'Rainforest') currentGoal = 100;
+            else if (biomeFound === 'Mossy Cave') currentGoal = 150;
+            else if (biomeFound === 'Mushroom Forest') currentGoal = 200;
+            else if (biomeFound === 'Microverse') currentGoal = 250;
+
+            dish.targetGoal = currentGoal;
+            currentCount = dish.sample.amount;
+            activeMutation = dish.mutation;
+
+            if (activeMutation.includes('Overgrown')) {
+                currentCount *= 2;
+            }
+
+            if (dish.sample.isDiscovered && dish.sample.knownName) {
+                finishMinigameAuto(dish.sample.knownName);
+            } else {
+                switchScreen('minigame-screen');
+            }
+        }
+
+        function setJoyconDir(x, y) {
+            joyconDir = { x, y };
+        }
+
+        function clearJoyconDir() {
+            joyconDir = null;
+        }
+
+        function initMinigame() {
+            microbes = [];
+            foodList = [];
+            foodSpawnTimer = 0;
+            joyconDir = null;
+
+            for (let i = 0; i < currentCount; i++) {
+                let randDirs = [{x:1, y:0}, {x:-1, y:0}, {x:0, y:1}, {x:0, y:-1}, {x:0.7, y:0.7}, {x:-0.7, y:-0.7}];
+                let initialDir = randDirs[Math.floor(Math.random() * randDirs.length)];
+                microbes.push({
+                    x: 220 + (Math.random() * 40 - 20),
+                    y: 120 + (Math.random() * 40 - 20),
+                    dirX: initialDir.x,
+                    dirY: initialDir.y,
+                    timer: Math.floor(Math.random() * 50)
+                });
+            }
+
+            if (gameLoopInterval) clearInterval(gameLoopInterval);
+            gameLoopInterval = setInterval(updateMinigame, 30);
+        }
+
+        function stopMinigame() {
+            if (gameLoopInterval) clearInterval(gameLoopInterval);
+        }
+
+        function updateMinigame() {
+            if (currentScreen !== 'minigame-screen') return;
+
+            let speed = 2.0;
+            if (activeMutation.includes('Lightweight') || activeMutation.includes('Isolated')) speed *= 1.5;
+            else if (activeMutation.includes('Heavy')) speed *= 0.5;
+            else if (activeMutation.includes('Mossy Shell')) speed *= 0.7;
+            else if (activeMutation.includes('Crystallized')) speed *= 0.75;
+            else if (activeMutation.includes('Erratic')) speed *= 1.5;
+            else if (activeMutation.includes('Sweet And Sour')) speed *= 1.3;
+
+            microbes.forEach(m => {
+                m.timer++;
+                if (m.timer >= 50) {
+                    m.timer = 0;
+                    let randDirs = [{x:1, y:0}, {x:-1, y:0}, {x:0, y:1}, {x:0, y:-1}, {x:0.7, y:0.7}, {x:-0.7, y:-0.7}];
+                    let newDir = randDirs[Math.floor(Math.random() * randDirs.length)];
+                    m.dirX = newDir.x;
+                    m.dirY = newDir.y;
+                }
+
+                let moveX, moveY;
+                if (joyconDir !== null) {
+                    moveX = (joyconDir.x + m.dirX * 0.3);
+                    moveY = (joyconDir.y + m.dirY * 0.3);
+                } else {
+                    moveX = m.dirX;
+                    moveY = m.dirY;
+                }
+
+                m.x += moveX * speed * 0.7;
+                m.y += moveY * speed * 0.7;
+
+                if (m.x < 10) { m.x = 10; m.dirX *= -1; }
+                if (m.x > 430) { m.x = 430; m.dirX *= -1; }
+                if (m.y < 10) { m.y = 10; m.dirY *= -1; }
+                if (m.y > 230) { m.y = 230; m.dirY *= -1; }
+            });
+
+            if (activeMutation.includes('Magnetic') && Math.random() < 0.01) {
+                foodList.forEach(f => {
+                    let closestM = microbes[0];
+                    let minDist = Infinity;
+                    microbes.forEach(m => {
+                        let d = Math.hypot(m.x - f.x, m.y - f.y);
+                        if (d < minDist) { minDist = d; closestM = m; }
+                    });
+                    if (closestM) {
+                        f.x += (closestM.x - f.x) * 0.2;
+                        f.y += (closestM.y - f.y) * 0.2;
+                    }
+                });
+            }
+
+            foodSpawnTimer++;
+            let spawnInterval = 46;
+            if (activeMutation.includes('Florescent')) spawnInterval = Math.floor(spawnInterval * 0.75);
+            else if (activeMutation.includes('Tropical')) spawnInterval = Math.floor(spawnInterval * 0.65);
+            else if (activeMutation.includes('Noisy')) spawnInterval = Math.floor(spawnInterval * 1.15);
+            else if (activeMutation.includes('Isolated')) spawnInterval = Math.floor(spawnInterval * 1.25);
+            else if (activeMutation.includes('Sweet And Sour')) spawnInterval = Math.floor(spawnInterval * 0.7);
+            else if (activeMutation.includes('Erratic')) spawnInterval = Math.floor(spawnInterval * 0.5);
+
+            if (foodSpawnTimer >= spawnInterval && foodList.length < 10) {
+                foodSpawnTimer = 0;
+                const symbols = ['🌿', '🌱', '☘️', '🍀', '🍄', '🍂'];
+                let chosenSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+                if (activeMutation.includes('Dried')) chosenSymbol = '🍂';
+                foodList.push({
+                    x: Math.random() * 400 + 20,
+                    y: Math.random() * 200 + 20,
+                    symbol: chosenSymbol
+                });
+            }
+
+            for (let i = foodList.length - 1; i >= 0; i--) {
+                let f = foodList[i];
+                let eaten = false;
+                for (let m of microbes) {
+                    let dist = Math.hypot(m.x - f.x, m.y - f.y);
+                    if (dist < 18) {
+                        eaten = true;
+                        break;
+                    }
+                }
+
+                if (eaten) {
+                    let addedValue = 1;
+                    if (activeMutation.includes('Heavy')) addedValue = 2;
+                    else if (activeMutation.includes('Tropical')) addedValue = 2;
+                    else if (activeMutation.includes('Isolated')) addedValue = 2;
+                    else if (activeMutation.includes('Mossy Shell')) addedValue = 1.2;
+                    else if (activeMutation.includes('Crystallized')) addedValue += 3;
+                    else if (activeMutation.includes('Infectious')) addedValue = Math.floor(Math.random() * 3) + 3;
+                    else if (activeMutation.includes('Destructive')) {
+                        if (Math.random() < 0.75) addedValue = 0;
+                        else addedValue = 5;
+                    }
+                    else if (activeMutation.includes('Sweet And Sour')) {
+                        if (Math.random() < 0.5) addedValue = 0;
+                    }
+                    else if (activeMutation.includes('Nutty') && ['🍂', '🌿', '🍀'].includes(f.symbol)) addedValue = 3;
+                    else if (activeMutation.includes('Fungal') && ['🍄', '🍂'].includes(f.symbol)) addedValue = 5;
+
+                    foodList.splice(i, 1);
+                    currentCount += addedValue;
+                    
+                    let spawnCount = 1;
+                    let randDirs = [{x:1, y:0}, {x:-1, y:0}, {x:0, y:1}, {x:0, y:-1}, {x:0.7, y:0.7}, {x:-0.7, y:-0.7}];
+
+                    for(let s = 0; s < spawnCount; s++) {
+                        let d = randDirs[Math.floor(Math.random() * randDirs.length)];
+                        microbes.push({
+                            x: f.x + (Math.random() * 10 - 5),
+                            y: f.y + (Math.random() * 10 - 5),
+                            dirX: d.x,
+                            dirY: d.y,
+                            timer: 0
+                        });
+                    }
+                }
+            }
+
+            renderMinigame();
+
+            if (currentCount >= currentGoal) {
+                stopMinigame();
+                finishMinigameWin();
+            }
+        }
+
+        function renderMinigame() {
+            const map = document.getElementById('game-map');
+            map.innerHTML = '';
+
+            document.getElementById('minigame-header').textContent = `Grow ${currentGoal} 🦠 ${currentCount} / ${currentGoal}`;
+
+            foodList.forEach(f => {
+                let el = document.createElement('div');
+                el.classList.add('game-entity');
+                el.style.left = f.x + 'px';
+                el.style.top = f.y + 'px';
+                el.textContent = f.symbol;
+                map.appendChild(el);
+            });
+
+            microbes.forEach(m => {
+                let el = document.createElement('div');
+                el.classList.add('game-entity');
+                el.style.left = m.x + 'px';
+                el.style.top = m.y + 'px';
+                if (activeMutation.includes('Translucent')) {
+                    el.style.opacity = '0.75';
+                }
+                el.textContent = '🦠';
+                map.appendChild(el);
+            });
+        }
+
+        function finishMinigameWin() {
+            let cultureName = prompt("Enter a name for your cultured microbe (Max 25 characters):", "My Culture");
+            if (!cultureName || cultureName.trim() === "") cultureName = "Unnamed Culture";
+            if (cultureName.length > 25) cultureName = cultureName.substring(0, 25);
+            finishMinigameAuto(cultureName);
+        }
+
+        function finishMinigameAuto(cultureName) {
+            let dish = dishes[activeCultureDish];
+
+            indexRegistry.microbes.add(cultureName);
+            if (dish.mutation !== 'None') {
+                dish.mutation.split(', ').forEach(m => indexRegistry.mutations.add(m));
+            }
+
+            inventory.cultured.push({
+                name: cultureName,
+                location: dish.sample.location,
+                size: dish.sample.size,
+                sizeRank: 1,
+                amount: currentCount,
+                mutation: dish.mutation,
+                mutationsList: dish.mutation !== 'None' ? dish.mutation.split(', ') : [],
+                isNew: true
+            });
+
+            dish.status = 'empty';
+            dish.sample = null;
+            dish.mutation = 'None';
+
+            alert('Culture successfully grown and sent to your Bag!');
+            switchScreen('lab-screen');
+        }
+
+        function openBagMain() {
+            if (currentScreen !== 'bag-main-screen' && currentScreen !== 'bag-category-screen' && currentScreen !== 'sample-info-screen' && currentScreen !== 'cultured-info-screen' && currentScreen !== 'action-target-screen') {
+                previousScreen = currentScreen;
+            }
+            stopMoving();
+            switchScreen('bag-main-screen');
+        }
+
+        function closeBag() {
+            switchScreen(previousScreen);
+        }
+
+        let currentCategory = '';
+        function openCategory(categoryKey) {
+            currentCategory = categoryKey;
+            inventory[categoryKey].forEach(item => item.isNew = false);
+
+            const titles = {
+                wild: '🦠 Wild Samples',
+                cultured: '🧪 Cultured Samples',
+                food: '🌱 Microbe Food',
+                items: '💼 Items'
+            };
+            document.getElementById('bag-cat-title').textContent = titles[categoryKey];
+            
+            renderCategoryItems(categoryKey);
+            switchScreen('bag-category-screen');
+            updateNotificationDots();
+        }
+
+        function renderCategoryItems(categoryKey) {
+            const bagGrid = document.getElementById('bag-grid');
+            bagGrid.innerHTML = '';
+
+            const items = inventory[categoryKey];
+
+            if (items.length === 0) {
+                bagGrid.innerHTML = '<div class="empty-bag-msg">Nothing Here!</div>';
+                return;
+            }
+
+            items.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.classList.add('sample-card');
+                
+                let redDotHTML = item.isNew ? '<div class="red-dot" style="display: block;"></div>' : '';
+
+                if (categoryKey === 'cultured') {
+                    card.innerHTML = `
+                        ${redDotHTML}
+                        <div class="sample-microbe">🦠</div>
+                        <div class="sample-info">
+                            <div class="sample-title-text">${item.name}</div>
+                            <div class="sample-location-text">${item.mutation || 'None'}</div>
+                        </div>
+                    `;
+                    card.onclick = () => {
+                        returnToIndexFromInfo = false;
+                        showCulturedInfo(item);
+                    };
+                } else if (categoryKey === 'food' || categoryKey === 'items') {
+                    card.innerHTML = `
+                        ${redDotHTML}
+                        <div class="sample-microbe">📦</div>
+                        <div class="sample-info">
+                            <div class="sample-title-text">${item.name}</div>
+                            <div class="sample-location-text">Click to Use</div>
+                        </div>
+                    `;
+                    card.onclick = () => useBagItem(categoryKey, index);
+                } else {
+                    card.innerHTML = `
+                        ${redDotHTML}
+                        <div class="sample-microbe">🦠</div>
+                        <div class="sample-info">
+                            <div class="sample-title-text">${item.name}</div>
+                            <div class="sample-location-text">${item.location}</div>
+                        </div>
+                    `;
+                    card.onclick = () => {
+                        returnToIndexFromInfo = false;
+                        showSampleInfo(item);
+                    };
+                }
+
+                bagGrid.appendChild(card);
+            });
+        }
+
+        function useBagItem(categoryKey, index) {
+            let item = inventory[categoryKey][index];
+
+            if (item.meta.type === 'refresh') {
+                inventory.items.splice(index, 1);
+                dishes.forEach(d => {
+                    if (d.status === 'growing') d.timeLeft = 0;
+                });
+                alert('Instant Refresh used! All growing cultures are now ready.');
+                openCategory('items');
+            } else if (item.meta.type === 'trap') {
+                if (currentScreen !== 'forest-screen') {
+                    alert('You can only place Microbe Traps while exploring a biome!');
+                    return;
+                }
+                inventory.items.splice(index, 1);
+                if (!placedTraps[activeBiome]) placedTraps[activeBiome] = [];
+                placedTraps[activeBiome].push(playerX);
+                alert('Microbe Trap placed at your current location!');
+                initForest();
+                closeBag();
+            } else if (item.meta.type === 'luck') {
+                inventory.items.splice(index, 1);
+                alert('Luck Boost activated for 5 minutes! Rare encounters increased.');
+                openCategory('items');
+            } else if (item.meta.type === 'instant_growth') {
+                if (inventory.wild.length === 0) {
+                    alert('No Wild Samples in bag to apply Instant Growth Serum on!');
+                    return;
+                }
+                openTargetPicker('wild', index, 'Pick a Wild Sample');
+            } else if (item.meta.type === 'size_serum' || item.meta.type === 'mutation_serum') {
+                if (inventory.cultured.length === 0) {
+                    alert('No Cultured Samples in bag to apply serum on!');
+                    return;
+                }
+                openTargetPicker('cultured', index, 'Pick a Culture');
+            }
+        }
+
+        function openTargetPicker(targetCategory, foodIndex, titleText) {
+            document.getElementById('target-screen-title').textContent = titleText;
+            const grid = document.getElementById('target-picker-grid');
+            grid.innerHTML = '';
+
+            let list = inventory[targetCategory];
+            list.forEach((targetItem, targetIndex) => {
+                const card = document.createElement('div');
+                card.classList.add('sample-card');
+                card.innerHTML = `
+                    <div class="sample-microbe">🦠</div>
+                    <div class="sample-info">
+                        <div class="sample-title-text">${targetItem.name}</div>
+                        <div class="sample-location-text">${targetItem.size || targetItem.mutation}</div>
+                    </div>
+                `;
+                card.onclick = () => applyFoodToTarget(targetCategory, foodIndex, targetIndex);
+                grid.appendChild(card);
+            });
+
+            switchScreen('action-target-screen');
+        }
+
+        function applyFoodToTarget(targetCategory, foodIndex, targetIndex) {
+            let foodItem = inventory.food[foodIndex];
+            let targetItem = inventory[targetCategory][targetIndex];
+
+            if (foodItem.meta.type === 'instant_growth') {
+                inventory.food.splice(foodIndex, 1);
+                targetItem.amount += 50;
+                alert('Instant Growth Serum applied! Wild sample amount increased.');
+            } else if (foodItem.meta.type === 'size_serum') {
+                if (targetItem.sizeRank >= 3) {
+                    alert('This microbe has already reached maximum size limit or has been used once!');
+                    return;
+                }
+                inventory.food.splice(foodIndex, 1);
+                targetItem.sizeRank = (targetItem.sizeRank || 1) + 1;
+                if (targetItem.size === 'Tiny') targetItem.size = 'Small';
+                else if (targetItem.size === 'Small') targetItem.size = 'Normal';
+                else if (targetItem.size === 'Normal') targetItem.size = 'Large';
+                else if (targetItem.size === 'Large') targetItem.size = 'Mega';
+                alert('Size Growth Serum applied successfully!');
+            } else if (foodItem.meta.type === 'mutation_serum') {
+                let discoveredMuts = Array.from(indexRegistry.mutations);
+                if (discoveredMuts.length === 0) {
+                    alert('You have not discovered any mutations in your Index yet!');
+                    return;
+                }
+
+                if (!targetItem.mutationsList) targetItem.mutationsList = [];
+                if (targetItem.mutationsList.length >= 3) {
+                    alert('This microbe already has the maximum of 3 mutations!');
+                    return;
+                }
+
+                let unlearnedDiscovered = discoveredMuts.filter(m => !targetItem.mutationsList.includes(m));
+                if (unlearnedDiscovered.length === 0) {
+                    alert('This microbe already possesses all discovered mutations!');
+                    return;
+                }
+
+                let newMut = unlearnedDiscovered[Math.floor(Math.random() * unlearnedDiscovered.length)];
+                inventory.food.splice(foodIndex, 1);
+                targetItem.mutationsList.push(newMut);
+                targetItem.mutation = targetItem.mutationsList.join(', ');
+                alert(`Mutation Serum applied! New discovered mutation gained: ${newMut}`);
+            }
+
+            openCategory(targetCategory);
+        }
+
+        function showSampleInfo(item) {
+            const statsContainer = document.getElementById('sample-stats');
+            statsContainer.innerHTML = `
+                Size: ${item.size}<br>
+                Location: ${item.location}<br>
+                Amount: ${item.amount}
+            `;
+            switchScreen('sample-info-screen');
+        }
+
+        function showCulturedInfo(item) {
+            const statsContainer = document.getElementById('cultured-stats');
+            statsContainer.innerHTML = `
+                Name: ${item.name}<br>
+                Size: ${item.size}<br>
+                Location: ${item.location}<br>
+                Amount: ${item.amount}<br>
+                Mutation: ${item.mutation || 'None'}
+            `;
+            switchScreen('cultured-info-screen');
+        }
+
+        function updateNotificationDots() {
+            let hasNewWild = inventory.wild.some(item => item.isNew);
+            let hasNewCultured = inventory.cultured.some(item => item.isNew);
+            let hasNewFood = inventory.food.some(item => item.isNew);
+            let hasNewItems = inventory.items.some(item => item.isNew);
+
+            let hasAnyNew = hasNewWild || hasNewCultured || hasNewFood || hasNewItems;
+
+            document.querySelectorAll('#bag-global-dot, #bag-global-dot-2, #bag-global-dot-3').forEach(dot => {
+                dot.style.display = hasAnyNew ? 'block' : 'none';
+            });
+
+            document.getElementById('cat-wild-dot').style.display = hasNewWild ? 'block' : 'none';
+            document.getElementById('cat-cultured-dot').style.display = hasNewCultured ? 'block' : 'none';
+            document.getElementById('cat-food-dot').style.display = hasNewFood ? 'block' : 'none';
+            document.getElementById('cat-items-dot').style.display = hasNewItems ? 'block' : 'none';
+        }
+
+        function startMoving(direction) {
+            targetVelocity = direction * maxSpeed;
+        }
+
+        function stopMoving() {
+            targetVelocity = 0;
+        }
+
+        let gameLoop = null;
+        function startForestLoop() {
+            if (gameLoop) clearInterval(gameLoop);
+            gameLoop = setInterval(() => {
+                if (currentScreen !== 'forest-screen') return;
+
+                playerVelocity += (targetVelocity - playerVelocity) * acceleration;
+                
+                if (targetVelocity === 0) {
+                    playerVelocity *= friction;
+                    if (Math.abs(playerVelocity) < 0.01) {
+                        playerVelocity = 0;
+                    }
+                }
+
+                playerX += playerVelocity;
+
+                if (playerX < 20) {
+                    playerX = 20;
+                    playerVelocity = 0;
+                }
+                if (playerX > 1460) {
+                    playerX = 1460;
+                    playerVelocity = 0;
+                }
+                
+                player.style.left = playerX + 'px';
+
+                let targetScroll = playerX - viewport.clientWidth / 2;
+                scrollX += (targetScroll - scrollX) * 0.1; 
+                viewport.scrollLeft = Math.round(scrollX);
+
+                checkProximity();
+
+            }, 16);
+        }
+
+        function stopForestLoop() {
+            if (gameLoop) clearInterval(gameLoop);
+        }
+
+        function getRandomTreeScale() {
+            const rand = Math.random();
+            if (rand < 0.15) return 1.0;
+            else if (rand < 0.50) return 1.5;
+            else if (rand < 0.85) return 2.0;
+            else return 2.5;
+        }
+
+        function initForest() {
+            if (activeBiome === 'Forest') initStandardForest();
+            else if (activeBiome === 'Rainforest') initRainforest();
+            else if (activeBiome === 'Mossy Cave') initMossyCave();
+            else if (activeBiome === 'Mushroom Forest') initMushroomForest();
+            else if (activeBiome === 'Microverse') initMicroverse();
+        }
+
+        function initStandardForest() {
+            viewport.style.backgroundColor = '#145a32';
+            const world = document.getElementById('forest-world');
+            const oldItems = world.querySelectorAll('.forest-item, .trap-item, .sky-object');
+            oldItems.forEach(item => item.remove());
+
+            document.getElementById('active-biome-title').textContent = `🌲 Forest 🌲`;
+            treesData = [];
+
+            for (let x = 40; x < 1470; x += 50) {
+                let offsetPos = x + (Math.random() * 20 - 10);
+                let treeElement = document.createElement('div');
+                treeElement.classList.add('forest-item');
+                treeElement.style.left = offsetPos + 'px';
+                
+                let hasMicrobe = Math.random() < 1/8;
+                let hasTrapHere = placedTraps[activeBiome] ? placedTraps[activeBiome].some(trapX => Math.abs(trapX - offsetPos) < 25) : false;
+                if (hasTrapHere) hasMicrobe = true;
+
+                let assignedKnown = null;
+                let isDiscoveredFlag = false;
+                if (hasMicrobe && inventory.cultured.length > 0 && Math.random() < 0.4) {
+                    let randomPastCulture = inventory.cultured[Math.floor(Math.random() * inventory.cultured.length)];
+                    assignedKnown = randomPastCulture.name;
+                    isDiscoveredFlag = true;
+                }
+
+                if (hasMicrobe) {
+                    treeElement.innerHTML = '🌳<span class="tiny-microbe">🦠</span>';
+                } else {
+                    treeElement.innerHTML = '🌳';
+                }
+                
+                let scale = getRandomTreeScale();
+                treeElement.style.fontSize = (playerBaseSize * scale) + 'rem';
+                world.appendChild(treeElement);
+
+                treesData.push({
+                    x: offsetPos,
+                    infected: hasMicrobe,
+                    element: treeElement,
+                    isDiscovered: isDiscoveredFlag,
+                    knownName: assignedKnown,
+                    hasTrap: hasTrapHere
+                });
+            }
+
+            for (let x = 100; x < 1470; x += 140) {
+                let offsetPos = x + (Math.random() * 40 - 20);
+                let rockElement = document.createElement('div');
+                rockElement.classList.add('forest-item');
+                rockElement.style.left = offsetPos + 'px';
+                rockElement.style.fontSize = Math.random() < 0.4 ? '1.3rem' : '0.9rem';
+
+                let hasMicrobe = Math.random() < 1/5;
+                let assignedKnown = null;
+                let isDiscoveredFlag = false;
+                if (hasMicrobe && inventory.cultured.length > 0 && Math.random() < 0.4) {
+                    let randomPastCulture = inventory.cultured[Math.floor(Math.random() * inventory.cultured.length)];
+                    assignedKnown = randomPastCulture.name;
+                    isDiscoveredFlag = true;
+                }
+
+                if (hasMicrobe) {
+                    rockElement.innerHTML = '🪨<span class="tiny-microbe">🦠</span>';
+                } else {
+                    rockElement.innerHTML = '🪨';
+                }
+                world.appendChild(rockElement);
+
+                treesData.push({
+                    x: offsetPos,
+                    infected: hasMicrobe,
+                    element: rockElement,
+                    isDiscovered: isDiscoveredFlag,
+                    knownName: assignedKnown,
+                    hasTrap: false
+                });
+            }
+
+            renderTrapsOnWorld(world);
+        }
+
+        function initRainforest() {
+            viewport.style.backgroundColor = '#145a32';
+            const world = document.getElementById('forest-world');
+            const oldItems = world.querySelectorAll('.forest-item, .trap-item, .sky-object');
+            oldItems.forEach(item => item.remove());
+
+            document.getElementById('active-biome-title').textContent = `🌴 Rainforest 🌴`;
+            treesData = [];
+
+            for (let x = 40; x < 1470; x += 50) {
+                let offsetPos = x + (Math.random() * 20 - 10);
+                let treeElement = document.createElement('div');
+                treeElement.classList.add('forest-item');
+                treeElement.style.left = offsetPos + 'px';
+                
+                let hasMicrobe = Math.random() < 1/8;
+                let hasTrapHere = placedTraps[activeBiome] ? placedTraps[activeBiome].some(trapX => Math.abs(trapX - offsetPos) < 25) : false;
+                if (hasTrapHere) hasMicrobe = true;
+
+                let assignedKnown = null;
+                let isDiscoveredFlag = false;
+                if (hasMicrobe && inventory.cultured.length > 0 && Math.random() < 0.4) {
+                    let randomPastCulture = inventory.cultured[Math.floor(Math.random() * inventory.cultured.length)];
+                    assignedKnown = randomPastCulture.name;
+                    isDiscoveredFlag = true;
+                }
+
+                if (hasMicrobe) {
+                    treeElement.innerHTML = '🌴<span class="tiny-microbe">🦠</span>';
+                } else {
+                    treeElement.innerHTML = '🌴';
+                }
+                
+                let scale = getRandomTreeScale();
+                treeElement.style.fontSize = (playerBaseSize * scale) + 'rem';
+                world.appendChild(treeElement);
+
+                treesData.push({
+                    x: offsetPos,
+                    infected: hasMicrobe,
+                    element: treeElement,
+                    isDiscovered: isDiscoveredFlag,
+                    knownName: assignedKnown,
+                    hasTrap: hasTrapHere
+                });
+            }
+
+            for (let x = 100; x < 1470; x += 140) {
+                let offsetPos = x + (Math.random() * 40 - 20);
+                let coconutElement = document.createElement('div');
+                coconutElement.classList.add('forest-item');
+                coconutElement.style.left = offsetPos + 'px';
+                coconutElement.style.fontSize = '1.1rem';
+
+                let hasMicrobe = Math.random() < 1/5;
+                let assignedKnown = null;
+                let isDiscoveredFlag = false;
+                if (hasMicrobe && inventory.cultured.length > 0 && Math.random() < 0.4) {
+                    let randomPastCulture = inventory.cultured[Math.floor(Math.random() * inventory.cultured.length)];
+                    assignedKnown = randomPastCulture.name;
+                    isDiscoveredFlag = true;
+                }
+
+                if (hasMicrobe) {
+                    coconutElement.innerHTML = '🥥<span class="tiny-microbe">🦠</span>';
+                } else {
+                    coconutElement.innerHTML = '🥥';
+                }
+                world.appendChild(coconutElement);
+
+                treesData.push({
+                    x: offsetPos,
+                    infected: hasMicrobe,
+                    element: coconutElement,
+                    isDiscovered: isDiscoveredFlag,
+                    knownName: assignedKnown,
+                    hasTrap: false
+                });
+            }
+
+            renderTrapsOnWorld(world);
+        }
+
+        function initMossyCave() {
+            viewport.style.backgroundColor = '#145a32';
+            const world = document.getElementById('forest-world');
+            const oldItems = world.querySelectorAll('.forest-item, .trap-item, .sky-object');
+            oldItems.forEach(item => item.remove());
+
+            document.getElementById('active-biome-title').textContent = `🌿 Mossy Cave 🌿`;
+            treesData = [];
+
+            for (let x = 40; x < 1470; x += 50) {
+                let offsetPos = x + (Math.random() * 20 - 10);
+                let nodeElement = document.createElement('div');
+                nodeElement.classList.add('forest-item');
+                nodeElement.style.left = offsetPos + 'px';
+                
+                let hasMicrobe = Math.random() < 1/8;
+                let hasTrapHere = placedTraps[activeBiome] ? placedTraps[activeBiome].some(trapX => Math.abs(trapX - offsetPos) < 25) : false;
+                if (hasTrapHere) hasMicrobe = true;
+
+                let assignedKnown = null;
+                let isDiscoveredFlag = false;
+                if (hasMicrobe && inventory.cultured.length > 0 && Math.random() < 0.4) {
+                    let randomPastCulture = inventory.cultured[Math.floor(Math.random() * inventory.cultured.length)];
+                    assignedKnown = randomPastCulture.name;
+                    isDiscoveredFlag = true;
+                }
+
+                if (hasMicrobe) {
+                    nodeElement.innerHTML = '🌿<span class="tiny-microbe">🦠</span>';
+                } else {
+                    nodeElement.innerHTML = '🌿';
+                }
+                
+                let scale = getRandomTreeScale();
+                nodeElement.style.fontSize = (playerBaseSize * scale) + 'rem';
+                world.appendChild(nodeElement);
+
+                treesData.push({
+                    x: offsetPos,
+                    infected: hasMicrobe,
+                    element: nodeElement,
+                    isDiscovered: isDiscoveredFlag,
+                    knownName: assignedKnown,
+                    hasTrap: hasTrapHere
+                });
+            }
+
+            for (let x = 90; x < 1470; x += 120) {
+                let offsetPos = x + (Math.random() * 40 - 20);
+                let rockElement = document.createElement('div');
+                rockElement.classList.add('forest-item');
+                rockElement.style.left = offsetPos + 'px';
+                rockElement.style.fontSize = '1.2rem';
+
+                let hasMicrobe = Math.random() < 1/5;
+                let assignedKnown = null;
+                let isDiscoveredFlag = false;
+                if (hasMicrobe && inventory.cultured.length > 0 && Math.random() < 0.4) {
+                    let randomPastCulture = inventory.cultured[Math.floor(Math.random() * inventory.cultured.length)];
+                    assignedKnown = randomPastCulture.name;
+                    isDiscoveredFlag = true;
+                }
+
+                if (hasMicrobe) {
+                    rockElement.innerHTML = '🪨<span class="tiny-microbe">🦠</span>';
+                } else {
+                    rockElement.innerHTML = '🪨';
+                }
+                world.appendChild(rockElement);
+
+                treesData.push({
+                    x: offsetPos,
+                    infected: hasMicrobe,
+                    element: rockElement,
+                    isDiscovered: isDiscoveredFlag,
+                    knownName: assignedKnown,
+                    hasTrap: false
+                });
+            }
+
+            renderTrapsOnWorld(world);
+        }
+
+        function initMushroomForest() {
+            viewport.style.backgroundColor = '#145a32';
+            const world = document.getElementById('forest-world');
+            const oldItems = world.querySelectorAll('.forest-item, .trap-item, .sky-object');
+            oldItems.forEach(item => item.remove());
+
+            document.getElementById('active-biome-title').textContent = `🍄 Mushroom Forest 🍄`;
+            treesData = [];
+
+            for (let x = 40; x < 1470; x += 50) {
+                let offsetPos = x + (Math.random() * 20 - 10);
+                let shroomElement = document.createElement('div');
+                shroomElement.classList.add('forest-item');
+                shroomElement.style.left = offsetPos + 'px';
+                
+                let hasMicrobe = Math.random() < 1/8;
+                let hasTrapHere = placedTraps[activeBiome] ? placedTraps[activeBiome].some(trapX => Math.abs(trapX - offsetPos) < 25) : false;
+                if (hasTrapHere) hasMicrobe = true;
+
+                let assignedKnown = null;
+                let isDiscoveredFlag = false;
+                if (hasMicrobe && inventory.cultured.length > 0 && Math.random() < 0.4) {
+                    let randomPastCulture = inventory.cultured[Math.floor(Math.random() * inventory.cultured.length)];
+                    assignedKnown = randomPastCulture.name;
+                    isDiscoveredFlag = true;
+                }
+
+                if (hasMicrobe) {
+                    shroomElement.innerHTML = '🍄<span class="tiny-microbe">🦠</span>';
+                } else {
+                    shroomElement.innerHTML = '🍄';
+                }
+                
+                let scale = getRandomTreeScale();
+                shroomElement.style.fontSize = (playerBaseSize * scale) + 'rem';
+                world.appendChild(shroomElement);
+
+                treesData.push({
+                    x: offsetPos,
+                    infected: hasMicrobe,
+                    element: shroomElement,
+                    isDiscovered: isDiscoveredFlag,
+                    knownName: assignedKnown,
+                    hasTrap: hasTrapHere
+                });
+            }
+
+            for (let x = 110; x < 1470; x += 130) {
+                let offsetPos = x + (Math.random() * 40 - 20);
+                let sproutElement = document.createElement('div');
+                sproutElement.classList.add('forest-item');
+                sproutElement.style.left = offsetPos + 'px';
+                sproutElement.style.fontSize = '1.0rem';
+
+                let hasMicrobe = Math.random() < 1/5;
+                let assignedKnown = null;
+                let isDiscoveredFlag = false;
+                if (hasMicrobe && inventory.cultured.length > 0 && Math.random() < 0.4) {
+                    let randomPastCulture = inventory.cultured[Math.floor(Math.random() * inventory.cultured.length)];
+                    assignedKnown = randomPastCulture.name;
+                    isDiscoveredFlag = true;
+                }
+
+                if (hasMicrobe) {
+                    sproutElement.innerHTML = '🌱<span class="tiny-microbe">🦠</span>';
+                } else {
+                    sproutElement.innerHTML = '🌱';
+                }
+                world.appendChild(sproutElement);
+
+                treesData.push({
+                    x: offsetPos,
+                    infected: hasMicrobe,
+                    element: sproutElement,
+                    isDiscovered: isDiscoveredFlag,
+                    knownName: assignedKnown,
+                    hasTrap: false
+                });
+            }
+
+            renderTrapsOnWorld(world);
+        }
+
+        function initMicroverse() {
+            viewport.style.backgroundColor = '#2c1654';
+            const world = document.getElementById('forest-world');
+            const oldItems = world.querySelectorAll('.forest-item, .trap-item, .sky-object');
+            oldItems.forEach(item => item.remove());
+
+            document.getElementById('active-biome-title').textContent = `🔮 Microverse 🔮`;
+            treesData = [];
+
+            const skySymbols = ['🌀', '💫⭐', '🌟', '✴️', '❇️', '☄️'];
+            for (let x = 30; x < 1470; x += 70) {
+                let skyEl = document.createElement('div');
+                skyEl.classList.add('sky-object');
+                skyEl.style.left = (x + (Math.random() * 30 - 15)) + 'px';
+                skyEl.style.top = (Math.random() * 70 + 10) + 'px';
+                skyEl.style.fontSize = '0.65rem';
+                skyEl.textContent = skySymbols[Math.floor(Math.random() * skySymbols.length)];
+                world.appendChild(skyEl);
+            }
+
+            for (let x = 40; x < 1470; x += 50) {
+                let offsetPos = x + (Math.random() * 20 - 10);
+                let candleElement = document.createElement('div');
+                candleElement.classList.add('forest-item');
+                candleElement.style.left = offsetPos + 'px';
+                
+                let hasMicrobe = Math.random() < 1/3;
+                let hasTrapHere = placedTraps[activeBiome] ? placedTraps[activeBiome].some(trapX => Math.abs(trapX - offsetPos) < 25) : false;
+                if (hasTrapHere) hasMicrobe = true;
+
+                let assignedKnown = null;
+                let isDiscoveredFlag = false;
+                if (hasMicrobe && inventory.cultured.length > 0 && Math.random() < 0.4) {
+                    let randomPastCulture = inventory.cultured[Math.floor(Math.random() * inventory.cultured.length)];
+                    assignedKnown = randomPastCulture.name;
+                    isDisdiscoveredFlag = true;
+                }
+
+                if (hasMicrobe) {
+                    candleElement.innerHTML = '🕯️<span class="tiny-microbe">🦠</span>';
+                } else {
+                    candleElement.innerHTML = '🕯️';
+                }
+                
+                let scale = getRandomTreeScale();
+                candleElement.style.fontSize = (playerBaseSize * scale) + 'rem';
+                world.appendChild(candleElement);
+
+                treesData.push({
+                    x: offsetPos,
+                    infected: hasMicrobe,
+                    element: candleElement,
+                    isDiscovered: isDiscoveredFlag,
+                    knownName: assignedKnown,
+                    hasTrap: hasTrapHere
+                });
+            }
+
+            for (let x = 100; x < 1470; x += 140) {
+                let offsetPos = x + (Math.random() * 40 - 20);
+                let orbElement = document.createElement('div');
+                orbElement.classList.add('forest-item');
+                orbElement.style.left = offsetPos + 'px';
+                orbElement.style.fontSize = '1.3rem';
+
+                let hasMicrobe = Math.random() < 1/5;
+                let assignedKnown = null;
+                let isDiscoveredFlag = false;
+                if (hasMicrobe && inventory.cultured.length > 0 && Math.random() < 0.4) {
+                    let randomPastCulture = inventory.cultured[Math.floor(Math.random() * inventory.cultured.length)];
+                    assignedKnown = randomPastCulture.name;
+                    isDiscoveredFlag = true;
+                }
+
+                if (hasMicrobe) {
+                    orbElement.innerHTML = '🔮<span class="tiny-microbe">🦠</span>';
+                } else {
+                    orbElement.innerHTML = '🔮';
+                }
+                world.appendChild(orbElement);
+
+                treesData.push({
+                    x: offsetPos,
+                    infected: hasMicrobe,
+                    element: orbElement,
+                    isDiscovered: isDiscoveredFlag,
+                    knownName: assignedKnown,
+                    hasTrap: false
+                });
+            }
+
+            renderTrapsOnWorld(world);
+        }
+
+        function renderTrapsOnWorld(world) {
+            if (placedTraps[activeBiome]) {
+                placedTraps[activeBiome].forEach(tX => {
+                    let trapEl = document.createElement('div');
+                    trapEl.classList.add('trap-item');
+                    trapEl.style.left = tX + 'px';
+                    trapEl.textContent = '🪤';
+                    world.appendChild(trapEl);
+                });
+            }
+        }
+
+        function checkProximity() {
+            let nearTree = null;
+            for (let tree of treesData) {
+                if (tree.infected && Math.abs(playerX - tree.x) < 40) {
+                    nearTree = tree;
+                    break;
+                }
+            }
+
+            if (nearTree) {
+                if (nearTree.isDiscovered && nearTree.knownName) {
+                    hintBox.textContent = nearTree.knownName;
+                } else {
+                    hintBox.textContent = "???";
+                }
+                hintBox.classList.add('show');
+            } else {
+                hintBox.classList.remove('show');
+            }
+        }
+
+        function inspectTree() {
+            for (let tree of treesData) {
+                if (tree.infected && Math.abs(playerX - tree.x) < 40) {
+                    notification.textContent = '🧪 Sample Collected!';
+                    tree.infected = false; 
+                    let microbeSpan = tree.element.querySelector('.tiny-microbe');
+                    if (microbeSpan) {
+                        microbeSpan.remove();
+                    }
+                    hintBox.classList.remove('show');
+
+                    if (tree.hasTrap && placedTraps[activeBiome]) {
+                        placedTraps[activeBiome] = placedTraps[activeBiome].filter(tx => Math.abs(tx - tree.x) >= 25);
+                    }
+
+                    const randSize = Math.random();
+                    let randomSize;
+                    if (randSize < 0.35) randomSize = 'Normal';
+                    else if (randSize < 0.525) randomSize = 'Small';
+                    else if (randSize < 0.70) randomSize = 'Large';
+                    else if (randSize < 0.85) randomSize = 'Tiny';
+                    else randomSize = 'Mega';
+
+                    const randomAmount = Math.floor(Math.random() * 15) + 1;
+
+                    inventory.wild.push({
+                        name: tree.isDiscovered ? tree.knownName : 'Wild Sample',
+                        location: activeBiome,
+                        size: randomSize,
+                        amount: randomAmount,
+                        isDiscovered: tree.isDiscovered,
+                        knownName: tree.knownName,
+                        isNew: true
+                    });
+
+                    updateNotificationDots();
+                    break;
+                }
+            }
+        }
+
+        function openExploreMenu() {
+            const grid = document.getElementById('biomes-grid-container');
+            grid.innerHTML = '';
+
+            addBiomeBtn(grid, '🌲 Forest', true, () => enterBiome('Forest'));
+            addBiomeBtn(grid, '🌴 Rainforest', shopUnlocks.maps['Rainforest'], () => enterBiome('Rainforest'));
+            addBiomeBtn(grid, '🌿 Mossy Cave', shopUnlocks.maps['Mossy Cave'], () => enterBiome('Mossy Cave'));
+            addBiomeBtn(grid, '🍄 Mushroom Forest', shopUnlocks.maps['Mushroom Forest'], () => enterBiome('Mushroom Forest'));
+            addBiomeBtn(grid, '🔮 Microverse', shopUnlocks.maps['Microverse'], () => enterBiome('Microverse'));
+
+            switchScreen('explore-menu-screen');
+        }
+
+        function addBiomeBtn(parent, label, unlocked, callback) {
+            let btn = document.createElement('button');
+            if (unlocked) {
+                btn.className = 'biome-btn';
+                btn.textContent = label;
+                btn.onclick = callback;
+            } else {
+                btn.className = 'biome-btn locked-biome';
+                btn.textContent = '🔒';
+            }
+            parent.appendChild(btn);
+        }
+
+        function enterBiome(biomeName) {
+            activeBiome = biomeName;
+            switchScreen('forest-screen');
+        }
+    </script>
+</body>
+</html>
